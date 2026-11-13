@@ -28,7 +28,7 @@ docling = ["docling>=2.0"]
 marker = ["marker-pdf>=2.0"]
 ocr = ["pypdfium2>=4", "surya-ocr>=0.6"]
 api = ["fastapi>=0.110", "uvicorn>=0.29", "python-multipart>=0.0.9"]
-dev = ["pytest>=8", "reportlab>=4", "ruff>=0.6"]
+dev = ["pytest>=8", "reportlab>=4", "ruff>=0.6", "httpx2>=2"]
 
 [project.scripts]
 pdftoall = "pdftoall.cli:main"
