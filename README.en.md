@@ -1,5 +1,8 @@
 # PdfToAll
 
+[![ci](https://github.com/vkust/PdfToAll/actions/workflows/ci.yml/badge.svg)](https://github.com/vkust/PdfToAll/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 PDF → **DOCX · XLSX · PPTX**, converted **on your machine**. No uploads, no accounts, no per-file limits.
 
 *Русская версия: [README.md](README.md)*
