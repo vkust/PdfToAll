@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Tauri (desktop shell, later)
+node_modules/
+target/
+src-tauri/target/
+dist-desktop/
+
+# Artefacts produced while testing
+samples/out/
+*.docx
+*.pptx
+*.xlsx
+!docs/**/*.docx
+
+# OS
+.DS_Store
+Thumbs.db

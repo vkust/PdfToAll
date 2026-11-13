@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: python -m pip install -e ".[dev,api]"
+      - name: Lint
+        run: python -m ruff check src tests
+      - name: Test
+        run: python -m pytest -q
+
+  libreoffice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install LibreOffice
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-writer-nogui libreoffice-impress-nogui libreoffice-calc-nogui
+      - name: Install package
+        run: python -m pip install -e ".[dev]"
+      - name: Test LibreOffice bridge
+        run: python -m pytest -q -k libreoffice
