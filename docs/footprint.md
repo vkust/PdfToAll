@@ -8,7 +8,7 @@
 |---|---|---|---|
 | репозиторий (код, тесты, тестовый PDF) | < 5 МБ | — | ~1.4 тыс. строк Python |
 | native-рантайм (`pip install -e .`) | 172 МБ (venv) | ~120 МБ | pdfplumber + 3 рендерера + FastAPI |
-| + мост LibreOffice | +186 МБ скачать / +765 МБ установить | ~250 МБ на процесс soffice | `libreoffice-{writer,impress,calc}-nogui` |
+| + мост LibreOffice | +186 МБ скачать / +765 МБ установить | ~250 МБ на процесс soffice | `libreoffice-{writer,impress,draw,calc}-nogui` + `python3-uno` + unoserver |
 | + docling | +~2 ГБ | ~2–4 ГБ | wheel torch 539 МБ + модели 530 МБ |
 | + marker | +~3–4 ГБ | ~4 ГБ | surya layout 250 МБ + веса распознавания + torch |
 | + OCR (PaddleOCR PP-Structure) | +~1 ГБ | ~1.5 ГБ | инференс на CPU медленный, но работает |

@@ -158,5 +158,7 @@ def get_engine(name: str) -> EngineInfo:
     return ENGINES[name]
 
 
-def soffice_path() -> str | None:
-    return shutil.which("soffice") or shutil.which("libreoffice")
+def unoconvert_path() -> str | None:
+    """unoconvert (from unoserver) is the only reliable way to force a PDF *import*
+    filter; plain `soffice --convert-to` cannot express input filters."""
+    return shutil.which("unoconvert")

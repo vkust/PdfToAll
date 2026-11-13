@@ -25,16 +25,25 @@ jobs:
       - name: Test
         run: python -m pytest -q
 
+  # Experimental and non-blocking: LibreOffice's PDF import filter depends on the
+  # distro build, so a red run here reports the environment, not our code.
   libreoffice:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install LibreOffice
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-writer-nogui libreoffice-impress-nogui libreoffice-calc-nogui
+      - name: Install LibreOffice + UNO bridge
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libreoffice-writer-nogui libreoffice-impress-nogui libreoffice-draw-nogui \
+            libreoffice-calc-nogui python3-uno
+      - name: Install unoserver for the system python (needs the uno module)
+        run: python3 -m pip install --break-system-packages unoserver
       - name: Install package
         run: python -m pip install -e ".[dev]"
       - name: Test LibreOffice bridge

@@ -47,7 +47,15 @@ def main(argv: list[str] | None = None) -> int:
     formats = tuple(f.strip() for f in args.formats.split(",") if f.strip())
     try:
         if args.libreoffice:
-            out = {f: convert_with_libreoffice(args.src, f, args.out_dir) for f in formats}
+            from .convert import UNO_INPUT_FILTERS
+
+            usable = tuple(f for f in formats if f in UNO_INPUT_FILTERS)
+            skipped = [f for f in formats if f not in UNO_INPUT_FILTERS]
+            if skipped:
+                print(f"note: LibreOffice path cannot produce {', '.join(skipped)}; skipped", file=sys.stderr)
+            if not usable:
+                raise ValueError(f"LibreOffice path supports {', '.join(UNO_INPUT_FILTERS)}")
+            out = {f: convert_with_libreoffice(args.src, f, args.out_dir) for f in usable}
         else:
             out = convert(args.src, args.out_dir, formats, engine=args.engine)
     except (EngineError, FileNotFoundError, ValueError) as exc:

@@ -29,7 +29,8 @@ pdftoall engines                               # what is installed
 | XLSX | One worksheet per detected table, header row styled, numbers stored as numbers, plus an index sheet |
 
 Not yet: images/figure extraction, vector graphics, fonts matching, page-faithful reflow.
-For "looks exactly like the PDF", use the LibreOffice bridge (below) — it trades editability for fidelity.
+For "looks exactly like the PDF", there is an experimental LibreOffice bridge (`--libreoffice`) — it trades
+editability for fidelity and depends on the LibreOffice build, see `docs/libreoffice.md`.
 
 ## Architecture
 
@@ -63,7 +64,7 @@ src/pdftoall/
 | native | included | MIT | born-digital PDFs, simple layout, speed matters |
 | docling | `.[docling]` | MIT | multi-column, complex tables, needs OCR — best license/quality balance |
 | marker | `.[marker]` | Apache-2.0 code / OpenRAIL-M weights | degraded scans, highest accuracy; runs on CPU |
-| LibreOffice | apt / docker | MPL-2.0 | layout-preserving fallback: `--libreoffice` |
+| LibreOffice | apt + unoserver | MPL-2.0 | **experimental**: layout-preserving path, `--libreoffice` (see `docs/libreoffice.md`) |
 
 Deliberately **not** used: PyMuPDF (AGPL-3.0) — see `docs/licensing.md` before adding it.
 

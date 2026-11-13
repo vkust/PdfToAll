@@ -11,7 +11,7 @@ from pptx import Presentation
 
 from pdftoall import convert, detect, parse
 from pdftoall.cli import main
-from pdftoall.engines import EngineError, available_engines, soffice_path
+from pdftoall.engines import EngineError, available_engines, unoconvert_path
 
 
 def test_parse_model(sample_pdf):
@@ -88,8 +88,10 @@ def test_unsupported_target(sample_pdf, out_dir):
         convert(sample_pdf, out_dir, ("pdf",))
 
 
-@pytest.mark.skipif(soffice_path() is None, reason="LibreOffice not installed")
+@pytest.mark.skipif(unoconvert_path() is None, reason="unoconvert (unoserver) not installed")
+@pytest.mark.skipif(os.environ.get("PDFTOALL_SKIP_LO") == "1", reason="LibreOffice PDF import disabled")
 def test_libreoffice_fallback(sample_pdf, out_dir):
+    """Opt-in: needs a LibreOffice whose PDF import filter works (see docs)."""
     from pdftoall import convert_with_libreoffice
 
     out = convert_with_libreoffice(sample_pdf, "docx", out_dir)
@@ -100,6 +102,21 @@ def test_libreoffice_missing_is_explicit(monkeypatch, sample_pdf, out_dir):
     import importlib
 
     conv_mod = importlib.import_module("pdftoall.convert")
-    monkeypatch.setattr(conv_mod, "soffice_path", lambda: None)
-    with pytest.raises(EngineError):
+    monkeypatch.setattr(conv_mod, "unoconvert_path", lambda: None)
+    with pytest.raises(EngineError, match="unoconvert not found"):
         conv_mod.convert_with_libreoffice(sample_pdf, "docx", out_dir)
+
+
+def test_libreoffice_error_document_is_rejected(tmp_path):
+    """A broken PDF import yields an error document; we must never ship it."""
+    import importlib
+
+    from docx import Document as Docx
+
+    conv_mod = importlib.import_module("pdftoall.convert")
+    fake = tmp_path / "broken.docx"
+    d = Docx()
+    d.add_paragraph("This PDF file is encrypted and can't be opened.")
+    d.save(fake)
+    with pytest.raises(EngineError, match="PDF import is not working"):
+        conv_mod.validate_libreoffice_output(str(fake))
