@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import os
 import re
 import socket
@@ -32,7 +33,8 @@ UNO_INPUT_FILTERS = {
 }
 # When LibreOffice's PDF import is broken/absent it silently writes an error
 # document instead of failing. We detect that text and raise instead of shipping it.
-IMPORT_ERROR_MARKER = "encrypted and can't be opened"
+# Note: the apostrophe arrives XML-escaped as &apos;, so match the prefix only.
+IMPORT_ERROR_MARKER = "encrypted and can"
 
 
 def parse(src: str, engine: str = "native") -> Document:
@@ -119,7 +121,7 @@ def _extracted_text(path: str) -> str:
             for name in zf.namelist():
                 if name.endswith((".xml", ".rtf")) and any(part in name for part in ("document", "slide", "content")):
                     chunks.append(zf.read(name).decode("utf-8", "ignore"))
-            return re.sub(r"<[^>]+>", " ", " ".join(chunks))
+            return html.unescape(re.sub(r"<[^>]+>", " ", " ".join(chunks)))
     except (zipfile.BadZipFile, OSError):
         try:
             return Path(path).read_bytes()[:20000].decode("latin-1", "ignore")

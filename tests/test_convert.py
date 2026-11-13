@@ -89,12 +89,20 @@ def test_unsupported_target(sample_pdf, out_dir):
 
 
 @pytest.mark.skipif(unoconvert_path() is None, reason="unoconvert (unoserver) not installed")
-@pytest.mark.skipif(os.environ.get("PDFTOALL_SKIP_LO") == "1", reason="LibreOffice PDF import disabled")
 def test_libreoffice_fallback(sample_pdf, out_dir):
-    """Opt-in: needs a LibreOffice whose PDF import filter works (see docs)."""
+    """Needs a LibreOffice whose PDF import filter works (see docs/libreoffice.md).
+
+    Many minimal builds ship a broken PDF import; on a dev machine we skip with the
+    diagnosis, in CI (PDFTOALL_LO_STRICT=1) the failure must surface.
+    """
     from pdftoall import convert_with_libreoffice
 
-    out = convert_with_libreoffice(sample_pdf, "docx", out_dir)
+    try:
+        out = convert_with_libreoffice(sample_pdf, "docx", out_dir)
+    except EngineError as exc:
+        if os.environ.get("PDFTOALL_LO_STRICT") == "1":
+            raise
+        pytest.skip(f"LibreOffice PDF import unusable here: {exc}")
     assert os.path.getsize(out) > 5000
 
 
@@ -105,6 +113,24 @@ def test_libreoffice_missing_is_explicit(monkeypatch, sample_pdf, out_dir):
     monkeypatch.setattr(conv_mod, "unoconvert_path", lambda: None)
     with pytest.raises(EngineError, match="unoconvert not found"):
         conv_mod.convert_with_libreoffice(sample_pdf, "docx", out_dir)
+
+
+def test_libreoffice_marker_survives_xml_escaping(tmp_path):
+    """LibreOffice writes the apostrophe as &apos;; detection must not depend on it."""
+    import importlib
+    import zipfile
+
+    conv_mod = importlib.import_module("pdftoall.convert")
+    broken = tmp_path / "escaped.docx"
+    with zipfile.ZipFile(broken, "w") as zf:
+        zf.writestr(
+            "word/document.xml",
+            "<w:document><w:body><w:p><w:r><w:t>This PDF file is encrypted and can&apos;t "
+            "be opened.</w:t></w:r></w:p></w:body></w:document>",
+        )
+        zf.writestr("padding.bin", "x" * 400)
+    with pytest.raises(EngineError, match="PDF import is not working"):
+        conv_mod.validate_libreoffice_output(str(broken))
 
 
 def test_libreoffice_error_document_is_rejected(tmp_path):
