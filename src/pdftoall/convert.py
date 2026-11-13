@@ -82,7 +82,7 @@ def ensure_unoserver(port: int | None = None, wait_s: float = 20.0) -> subproces
     if _port_open(port):
         return None
     server = str(Path(unoconvert_path() or "").with_name("unoserver")) if unoconvert_path() else "unoserver"
-    proc = subprocess.Popen(  # noqa: S603 - fixed argv, no shell
+    proc = subprocess.Popen(  # fixed argv, no shell
         [server, "--port", str(port)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
