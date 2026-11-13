@@ -1,42 +1,42 @@
-# Licensing — what we may and may not vendor
+# Лицензии — что можно и что нельзя класть в поставку
 
-Rule of thumb: anything AGPL/GPL stays **behind a process boundary** (separate binary, container, or
-user-installed dependency), never imported into `pdftoall` itself. Our own code stays MIT.
+Правило: всё под AGPL/GPL живёт **за границей процесса** (отдельный бинарь, контейнер или зависимость,
+которую ставит сам пользователь) и никогда не импортируется внутрь `pdftoall`. Наш код остаётся MIT.
 
-## Used directly (safe to ship in a closed-source product)
+## Используется напрямую (безопасно для закрытого продукта)
 
-| Component | License | Role |
+| Компонент | Лицензия | Роль |
 |---|---|---|
-| pdfplumber / pdfminer.six | MIT | native PDF ingest |
-| python-docx | MIT | DOCX render |
-| python-pptx | MIT | PPTX render |
-| openpyxl | MIT | XLSX render |
-| pypdf | BSD-3 | page count, metadata, PDF merge/split later |
-| FastAPI / Starlette | MIT / BSD-3 | local API |
-| reportlab | BSD | test fixtures only |
+| pdfplumber / pdfminer.six | MIT | native-разбор PDF |
+| python-docx | MIT | рендер DOCX |
+| python-pptx | MIT | рендер PPTX |
+| openpyxl | MIT | рендер XLSX |
+| pypdf | BSD-3 | число страниц, метаданные, позже склейка/разрезание PDF |
+| FastAPI / Starlette | MIT / BSD-3 | локальный API |
+| reportlab | BSD | только тестовые фикстуры |
 
-## Optional engines
+## Опциональные движки
 
-| Component | License | Constraint |
+| Компонент | Лицензия | Ограничение |
 |---|---|---|
-| docling (code) | MIT | models carry their own licenses (layout/TableFormer) — check before redistribution |
-| marker (code) | Apache-2.0 | ✅ commercial use |
-| marker (weights) | OpenRAIL-M | free for research, personal use and startups under a revenue threshold; larger companies need a commercial license from Datalab |
-| MinerU | Apache-2.0 + additional terms | read §1 of LICENSE.md: commercial licensing terms apply above a usage threshold |
-| MinerU2PPT | **none stated** | all rights reserved by default — ideas only, do not copy code |
+| docling (код) | MIT | у моделей свои лицензии (layout/TableFormer) — проверять перед перепаковкой |
+| marker (код) | Apache-2.0 | ✅ коммерческое использование разрешено |
+| marker (веса) | OpenRAIL-M | бесплатно для исследований, личного использования и стартапов ниже порога выручки; крупным компаниям нужна коммерческая лицензия от Datalab |
+| MinerU | Apache-2.0 + дополнительные условия | читать §1 LICENSE.md: выше порога использования действуют коммерческие условия |
+| MinerU2PPT | **не указана** | по умолчанию «все права защищены» — можно брать идеи, нельзя код |
 | PaddleOCR | Apache-2.0 | ✅ |
-| surya | Apache-2.0 code, OpenRAIL-M weights | same caveat as marker |
+| surya | Apache-2.0 код, OpenRAIL-M веса | та же оговорка, что у marker |
 
-## Process-boundary only
+## Только за границей процесса
 
-| Component | License | How to use |
+| Компонент | Лицензия | Как использовать |
 |---|---|---|
-| LibreOffice | MPL-2.0 (+ LGPL parts) | spawn `soffice --headless` as a separate process; do not link into our binary |
-| pandoc | GPL-2.0 | invoke as an external binary if we ever add Markdown→Office |
-| PDF-Extract-Kit | AGPL-3.0 | separate service/container only |
-| PyMuPDF | **AGPL-3.0** | avoid; if its speed becomes essential, buy the Artifex commercial license |
+| LibreOffice | MPL-2.0 (+ части LGPL) | запускать `soffice --headless` отдельным процессом, не линковать в наш бинарь |
+| pandoc | GPL-2.0 | вызывать как внешний бинарь, если понадобится Markdown → Office |
+| PDF-Extract-Kit | AGPL-3.0 | только отдельный сервис/контейнер |
+| PyMuPDF | **AGPL-3.0** | избегать; если скорость станет критичной — покупать коммерческую лицензию Artifex |
 
-## Trademarks
+## Товарные знаки
 
-`PdfToAll` is a descriptive name; do not use "Adobe", "Microsoft Word", "PowerPoint" or "Excel" as
-product-name components. Say "converts to DOCX/PPTX/XLSX" in marketing copy.
+`PdfToAll` — описательное название. Нельзя использовать «Adobe», «Microsoft Word», «PowerPoint» и «Excel»
+как часть названия продукта. В маркетинге пишем «конвертирует в DOCX/PPTX/XLSX».

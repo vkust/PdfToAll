@@ -1,101 +1,103 @@
 # PdfToAll
 
-PDF → **DOCX · XLSX · PPTX**, converted **on your machine**. No uploads, no accounts, no per-file limits.
+PDF → **DOCX · XLSX · PPTX** прямо **на твоей машине**. Без загрузки на сервер, без аккаунтов, без лимитов на размер файла.
 
-The project exists because the PDF-to-Office space is either closed (Adobe, ABBYY, Wondershare) or
-cloud-only (Smallpdf, iLovePDF, ConvertAPI) — and cloud means your contracts, medical records and
-financial statements leave your laptop. Even the strongest open-source PDF app, Stirling-PDF, is a
-server product: your document still travels.
+*English version: [README.en.md](README.en.md)*
 
-**Status:** v0.1.0 — the native conversion pipeline works end to end and is covered by tests.
-Neural engines (docling, marker) and the desktop shell are wired in but not yet shipped.
+Проект появился потому, что рынок «PDF → Office» либо закрытый (Adobe, ABBYY, Wondershare), либо облачный
+(Smallpdf, iLovePDF, ConvertAPI) — а облако означает, что договоры, медицинские карты и финансовые отчёты
+покидают ноутбук. Даже самый сильный open-source PDF-проект, Stirling-PDF, — серверный продукт: документ
+всё равно куда-то едет.
+
+**Статус:** v0.1.0 — native-конвейер работает end-to-end и покрыт тестами. Нейродвижки (docling, marker)
+и десктоп-оболочка подключены архитектурно, но ещё не поставлены.
 
 ```bash
-# text-based PDF, no models, ~50 ms/page
+# текстовый PDF, без моделей, ~50 мс на страницу
 pip install -e .[dev]
 pdftoall convert report.pdf -o out/            # -> report.docx, report.pptx, report.xlsx
-pdftoall info report.pdf                       # scanned? how many tables? which engine?
-pdftoall engines                               # what is installed
+pdftoall info report.pdf                       # скан? сколько таблиц? какой движок?
+pdftoall engines                               # что установлено
 ```
 
-## What it actually does
+## Что реально получается на выходе
 
-| Output | What you get |
+| Формат | Результат |
 |---|---|
-| DOCX | Real Word styles (`Heading 1..4`, `List Bullet`), editable paragraphs, native tables |
-| PPTX | One slide per PDF page, **geometry preserved** (blocks keep their relative position), native editable tables |
-| XLSX | One worksheet per detected table, header row styled, numbers stored as numbers, plus an index sheet |
+| DOCX | Настоящие стили Word (`Heading 1..4`, `List Bullet`), редактируемые абзацы, нативные таблицы |
+| PPTX | Один слайд на страницу PDF, **геометрия сохранена** (блоки держат относительные позиции), нативные редактируемые таблицы |
+| XLSX | Отдельный лист на каждую найденную таблицу, оформленная шапка, числа остаются числами, плюс лист-индекс |
 
-Not yet: images/figure extraction, vector graphics, fonts matching, page-faithful reflow.
-For "looks exactly like the PDF", use the LibreOffice bridge (below) — it trades editability for fidelity.
+Чего пока нет: извлечение картинок и графики, векторные объекты, подбор шрифтов, попиксельно точная вёрстка.
+Если нужен результат «выглядит ровно как PDF» — есть мост в LibreOffice (ниже): он меняет редактируемость на точность.
 
-## Architecture
+## Архитектура
 
 ```
-PDF ──▶ Engine ────▶ Document model ────▶ Renderers ────▶ .docx / .pptx / .xlsx
-        (native |    (Page, Block,      (python-docx,
-         docling |    Table; MIT-clean)   python-pptx,
-         marker)                          openpyxl)
+PDF ──▶ Движок ────▶ Модель документа ────▶ Рендереры ────▶ .docx / .pptx / .xlsx
+        (native |    (Page, Block,         (python-docx,
+         docling |    Table; только MIT)    python-pptx,
+         marker)                            openpyxl)
 ```
 
-The model is the product's contract: any engine that produces `Document` automatically gets all three
-renderers, and any new renderer works with every engine. Engines are swappable per file — a clean
-born-digital PDF goes through the native path in milliseconds, a scanned contract goes through
-docling/marker OCR.
+Модель документа — контракт продукта: любой движок, который умеет отдавать `Document`, автоматически
+получает все три рендерера, а любой новый рендерер работает со всеми движками. Движок выбирается под
+конкретный файл: чистый «цифровой» PDF проходит native-путём за миллисекунды, скан договора — через OCR
+docling/marker.
 
 ```
 src/pdftoall/
-  model.py        Document/Page/Block/Table — the intermediate representation
-  ingest.py       native engine: pdfplumber -> model (lines, blocks, headings, bullets, tables)
-  engines.py      registry + docling/marker adapters + LibreOffice detection
-  convert.py      one-call facade + LibreOffice fallback path
+  model.py        Document/Page/Block/Table — промежуточное представление
+  ingest.py       native-движок: pdfplumber -> модель (строки, блоки, заголовки, списки, таблицы)
+  engines.py      реестр движков + адаптеры docling/marker + определение LibreOffice
+  convert.py      фасад «одна функция» + резервный путь через LibreOffice
   render/         docx.py, pptx.py, xlsx.py
-  api.py          local FastAPI service (127.0.0.1) — the bridge for a Tauri/Electron UI
-  cli.py          `pdftoall` command
+  api.py          локальный сервис FastAPI (127.0.0.1) — мост для Tauri/Electron-интерфейса
+  cli.py          команда `pdftoall`
 ```
 
-## Engines
+## Движки
 
-| Engine | Install | License | Use when |
+| Движок | Установка | Лицензия | Когда использовать |
 |---|---|---|---|
-| native | included | MIT | born-digital PDFs, simple layout, speed matters |
-| docling | `.[docling]` | MIT | multi-column, complex tables, needs OCR — best license/quality balance |
-| marker | `.[marker]` | Apache-2.0 code / OpenRAIL-M weights | degraded scans, highest accuracy; runs on CPU |
-| LibreOffice | apt / docker | MPL-2.0 | layout-preserving fallback: `--libreoffice` |
+| native | входит в пакет | MIT | цифровые PDF, простая вёрстка, важна скорость |
+| docling | `.[docling]` | MIT | многоколоночный текст, сложные таблицы, нужен OCR — лучший баланс лицензии и качества |
+| marker | `.[marker]` | Apache-2.0 код / OpenRAIL-M веса | плохие сканы, максимальная точность; работает на CPU |
+| LibreOffice | apt / docker | MPL-2.0 | резервный путь с сохранением вёрстки: `--libreoffice` |
 
-Deliberately **not** used: PyMuPDF (AGPL-3.0) — see `docs/licensing.md` before adding it.
+Сознательно **не** используется: PyMuPDF (AGPL-3.0) — см. `docs/licensing.md`, прежде чем его добавлять.
 
-## API (for the desktop shell)
+## API для десктоп-оболочки
 
 ```bash
 uvicorn pdftoall.api:app --port 8765
 curl -F file=@report.pdf -F formats=docx,pptx http://127.0.0.1:8765/convert -o out.zip
 ```
 
-## Disk footprint
+## Место на диске
 
-Measured on this repo's test machine (`docs/footprint.md` has the breakdown):
+Замерено на тестовой машине этого репозитория (разбивка — в `docs/footprint.md`):
 
-- code + tests: **< 5 MB**
-- `pip install -e .[dev]`: **172 MB** (venv, incl. FastAPI)
-- LibreOffice bridge: **186 MB download / ~765 MB installed**
-- + docling: **~2 GB** (torch 539 MB + models 530 MB)
-- + marker: **~3–4 GB**
-- desktop shell (Tauri + Rust toolchain): **~2.5 GB** build-only
+- код и тесты: **< 5 МБ**
+- `pip install -e .[dev]`: **172 МБ** (venv, включая FastAPI)
+- мост LibreOffice: **186 МБ скачать / ~765 МБ установить**
+- + docling: **~2 ГБ** (torch 539 МБ + модели 530 МБ)
+- + marker: **~3–4 ГБ**
+- десктоп-оболочка (Tauri + Rust-тулчейн): **~2.5 ГБ**, только для сборки
 
-Shipping a desktop build: budget **~1.5 GB installer** with the LibreOffice bridge, **~2.5–3 GB** with
-docling bundled, **~150 MB** for the native-only build.
+Для релизной сборки: **~1.5 ГБ** инсталлятор с мостом LibreOffice, **~2.5–3 ГБ** со встроенным docling,
+**~150 МБ** в варианте только с native-движком.
 
-## Roadmap
+## План
 
-- [x] native engine + three renderers + CLI + local API + tests
-- [ ] image/figure extraction and placement
-- [ ] docling engine enabled by default on complex layouts (auto-routing by `detect()`)
-- [ ] conversion quality benchmark vs. LibreOffice/Stirling on a public PDF corpus
-- [ ] Tauri desktop shell (drag & drop, before/after preview via pdf.js/docxjs/SheetJS, batch mode)
-- [ ] OCR path for scans without a GPU
-- [ ] signed installers for Windows/macOS/Linux
+- [x] native-движок + три рендерера + CLI + локальный API + тесты
+- [ ] извлечение и размещение изображений
+- [ ] docling по умолчанию для сложных макетов (авто-роутинг по `detect()`)
+- [ ] бенчмарк качества против LibreOffice/Stirling на публичном корпусе PDF
+- [ ] десктоп-оболочка на Tauri (drag & drop, предпросмотр «до/после» через pdf.js/docxjs/SheetJS, пакетный режим)
+- [ ] OCR для сканов без GPU
+- [ ] подписанные инсталляторы для Windows/macOS/Linux
 
-## License
+## Лицензия
 
-MIT. See `docs/licensing.md` for the third-party license matrix.
+MIT. Матрица лицензий сторонних компонентов — `docs/licensing.md`.

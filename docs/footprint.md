@@ -1,34 +1,35 @@
-# Disk / memory footprint
+# Место на диске и в памяти
 
-Measured 2026-11-13 on a clean Linux box with Python 3.14 (wheels resolved fresh).
+Замерено 13.11.2026 на чистой Linux-машине с Python 3.14 (зависимости ставились с нуля).
 
-## Configurations
+## Конфигурации
 
-| Setup | Disk | RAM floor | Note |
+| Набор | Диск | Минимум RAM | Примечание |
 |---|---|---|---|
-| repo (code, tests, sample PDF) | < 5 MB | — | 13 files of Python, ~1.4 kLOC |
-| native runtime (`pip install -e .`) | 172 MB (venv) | ~120 MB | pdfplumber + 3 renderers + FastAPI |
-| + LibreOffice bridge | +186 MB download / +765 MB installed | ~250 MB per soffice process | `libreoffice-{writer,impress,calc}-nogui` |
-| + docling | +~2 GB | ~2–4 GB | torch 539 MB wheel + 530 MB models |
-| + marker | +~3–4 GB | ~4 GB | surya layout 250 MB + recognition weights + torch |
-| + OCR (PaddleOCR PP-Structure) | +~1 GB | ~1.5 GB | CPU inference is slow but works |
-| PDF-Extract-Kit (all models) | +15.1 GB | ~6 GB | not bundled; server-side only |
-| Tauri build toolchain (Rust + node_modules + target/) | +~2.5 GB | — | build machine only, not shipped |
+| репозиторий (код, тесты, тестовый PDF) | < 5 МБ | — | ~1.4 тыс. строк Python |
+| native-рантайм (`pip install -e .`) | 172 МБ (venv) | ~120 МБ | pdfplumber + 3 рендерера + FastAPI |
+| + мост LibreOffice | +186 МБ скачать / +765 МБ установить | ~250 МБ на процесс soffice | `libreoffice-{writer,impress,calc}-nogui` |
+| + docling | +~2 ГБ | ~2–4 ГБ | wheel torch 539 МБ + модели 530 МБ |
+| + marker | +~3–4 ГБ | ~4 ГБ | surya layout 250 МБ + веса распознавания + torch |
+| + OCR (PaddleOCR PP-Structure) | +~1 ГБ | ~1.5 ГБ | инференс на CPU медленный, но работает |
+| PDF-Extract-Kit (все модели) | +15.1 ГБ | ~6 ГБ | не входит в поставку, только серверная сторона |
+| тулчейн сборки Tauri (Rust + node_modules + target/) | +~2.5 ГБ | — | только машина разработчика, в поставку не идёт |
 
-## What a released installer looks like
+## Каким получается релизный установщик
 
-| Distribution | Size |
+| Вариант поставки | Размер |
 |---|---|
-| native-only (no models, no LO) | ~120–180 MB |
-| + LibreOffice bridge | ~1.4–1.8 GB |
-| + docling models bundled | ~2.5–3 GB |
-| + OCR models | ~3.5–4 GB |
+| только native (без моделей и LibreOffice) | ~120–180 МБ |
+| + мост LibreOffice | ~1.4–1.8 ГБ |
+| + встроенные модели docling | ~2.5–3 ГБ |
+| + модели OCR | ~3.5–4 ГБ |
 
-Recommendation: ship **native + LibreOffice** in the base installer and download the neural engine on
-first use of a scanned document (~600 MB, one-time), which keeps the download under 2 GB while still
-working offline after setup.
+Рекомендация: в базовый установщик класть **native + LibreOffice**, а нейродвижок догружать при первом
+столкновении со сканом (~600 МБ один раз) — так загрузка остаётся меньше 2 ГБ, но после установки всё
+работает офлайн.
 
-## Runtime cost of the native engine
+## Стоимость native-движка в работе
 
-~50 ms/page on one core, ~120 MB RSS for a 100-page document — because pdfplumber is pure Python and
-no model is loaded. That is why the native path stays the default on desktop.
+~50 мс на страницу на одном ядре, ~120 МБ RSS на документ в 100 страниц — потому что pdfplumber это
+чистый Python и никакая модель не загружается. Именно поэтому native-путь остаётся путём по умолчанию
+на десктопе.
