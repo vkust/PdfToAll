@@ -41,9 +41,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             libreoffice-writer-nogui libreoffice-impress-nogui libreoffice-draw-nogui \
-            libreoffice-calc-nogui python3-uno
-      - name: Install unoserver for the system python (needs the uno module)
-        run: python3 -m pip install --break-system-packages unoserver
+            libreoffice-calc-nogui python3-uno python3-pip
+      # unoserver must run on the distro python: the `uno` module has no wheel.
+      - name: Install unoserver for the system python
+        run: sudo /usr/bin/python3 -m pip install --break-system-packages unoserver
       - name: Install package
         run: python -m pip install -e ".[dev]"
       - name: Test LibreOffice bridge
