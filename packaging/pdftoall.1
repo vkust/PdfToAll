@@ -1,0 +1,41 @@
+.TH PDFTOALL 1 "2026-11-13" "pdftoall 0.1.0" "User Commands"
+.SH NAME
+pdftoall \- convert PDF into DOCX, XLSX and PPTX locally
+.SH SYNOPSIS
+.B pdftoall convert
+[\-o DIR] [\-f docx,pptx,xlsx] [\-e native|docling|marker] [\-\-libreoffice] FILE
+.br
+.B pdftoall info
+FILE
+.br
+.B pdftoall engines
+.SH DESCRIPTION
+.B pdftoall
+parses a PDF into an intermediate document model and renders it to Office
+formats. No network access is used and no document leaves the machine.
+.SH OPTIONS
+.TP
+.B \-o, \-\-out\-dir DIR
+Where to write the results (default: next to the input file).
+.TP
+.B \-f, \-\-formats LIST
+Comma separated targets: docx, pptx, xlsx (default: all three).
+.TP
+.B \-e, \-\-engine NAME
+Parsing engine: native (default), docling, marker.
+.TP
+.B \-\-libreoffice
+Use the experimental LibreOffice PDF-import path (layout fidelity, poor editability).
+.TP
+.B \-\-json
+Machine-readable output.
+.SH EXAMPLES
+pdftoall convert report.pdf -o out/
+.br
+pdftoall convert report.pdf -f xlsx -e native
+.br
+pdftoall info report.pdf
+.SH EXIT STATUS
+0 on success, 2 on a conversion or usage error.
+.SH SEE ALSO
+https://github.com/vkust/PdfToAll

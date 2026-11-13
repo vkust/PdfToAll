@@ -23,6 +23,28 @@ pdftoall info report.pdf                       # scanned? how many tables? which
 pdftoall engines                               # what is installed
 ```
 
+## Install from releases
+
+Prebuilt artifacts live in [Releases](https://github.com/vkust/PdfToAll/releases); the binary is
+self-contained, no Python required.
+
+```bash
+# Debian / Ubuntu
+sudo dpkg -i pdftoall_0.1.0_amd64.deb
+
+# Fedora / RHEL / openSUSE
+sudo rpm -i pdftoall-0.1.0-1.x86_64.rpm
+
+# any Linux without a package manager
+tar -xzf pdftoall-0.1.0-linux-x86_64.tar.gz && ./pdftoall/pdftoall --version
+```
+
+Windows: unzip `pdftoall-0.1.0-windows-x64.zip` and run `pdftoall.exe` — no installation step.
+Builds are not code-signed yet: expect a SmartScreen prompt and an rpm GPG warning.
+Checksums are published as `SHA256SUMS.txt` next to the files.
+
+Size: `.deb`/`.rpm`/`.tar.gz` ~41 MB (~91 MB installed), see the release page for the Windows zip.
+
 ## What it actually does
 
 | Output | What you get |

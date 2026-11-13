@@ -1,4 +1,4 @@
-.PHONY: install test lint sample api clean
+.PHONY: install test lint sample api package-linux clean
 
 install:
 	python -m pip install -e ".[dev,api]"
@@ -15,6 +15,9 @@ sample:
 
 api:
 	uvicorn pdftoall.api:app --host 127.0.0.1 --port 8765
+
+package-linux:
+	NFPM=$${NFPM:-nfpm} bash packaging/build-linux.sh
 
 clean:
 	rm -rf .pytest_cache .ruff_cache build dist *.egg-info samples/out

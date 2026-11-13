@@ -23,6 +23,29 @@ pdftoall info report.pdf                       # скан? сколько таб
 pdftoall engines                               # что установлено
 ```
 
+## Установка из релизов
+
+Готовые сборки лежат в [Releases](https://github.com/vkust/PdfToAll/releases) — бинарник самодостаточный,
+Python ставить не нужно.
+
+```bash
+# Debian / Ubuntu
+sudo dpkg -i pdftoall_0.1.0_amd64.deb
+
+# Fedora / RHEL / openSUSE
+sudo rpm -i pdftoall-0.1.0-1.x86_64.rpm
+
+# любой Linux без пакетного менеджера
+tar -xzf pdftoall-0.1.0-linux-x86_64.tar.gz && ./pdftoall/pdftoall --version
+```
+
+Windows: распаковать `pdftoall-0.1.0-windows-x64.zip` и запустить `pdftoall.exe` — установка не требуется.
+Сборки пока не подписаны: SmartScreen покажет предупреждение («Подробнее» → «Выполнить в любом случае»),
+а `rpm` ругнётся на отсутствие GPG-подписи. Контрольные суммы — в `SHA256SUMS.txt` рядом с файлами.
+
+Размер: `.deb`/`.rpm`/`.tar.gz` ~41 МБ (в распакованном виде ~91 МБ), zip для Windows — см. релиз.
+Внутри — только native-движок (pdfplumber); docling/marker ставятся отдельно и в пакет не входят.
+
 ## Что реально получается на выходе
 
 | Формат | Результат |

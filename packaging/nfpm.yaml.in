@@ -1,0 +1,37 @@
+name: pdftoall
+arch: @@ARCH@@
+platform: linux
+version: @@VERSION@@
+version_schema: semver
+section: utils
+priority: optional
+maintainer: PdfToAll contributors <bender@users.noreply.github.com>
+vendor: PdfToAll
+homepage: https://github.com/vkust/PdfToAll
+license: MIT
+description: |
+  Convert PDF into DOCX, XLSX and PPTX locally.
+  Runs fully offline: documents are never uploaded, nothing is sent to a
+  server. Produces editable Word styles, native PowerPoint tables and
+  spreadsheets with real numbers.
+depends: []
+contents:
+  - src: dist/pdftoall
+    dst: /usr/lib/pdftoall
+    type: tree
+  - src: packaging/pdftoall-launcher.sh
+    dst: /usr/bin/pdftoall
+    file_info:
+      mode: 0755
+  - src: packaging/pdftoall.1
+    dst: /usr/share/man/man1/pdftoall.1
+    file_info:
+      mode: 0644
+rpm:
+  group: Applications/Productivity
+  summary: Offline PDF to DOCX/XLSX/PPTX converter
+  compression: gzip
+deb:
+  compression: gzip
+  fields:
+    Bugs: https://github.com/vkust/PdfToAll/issues
