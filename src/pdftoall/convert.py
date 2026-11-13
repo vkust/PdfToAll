@@ -6,6 +6,7 @@ import os
 import re
 import socket
 import subprocess
+import tempfile
 import time
 import zipfile
 from pathlib import Path
@@ -76,25 +77,38 @@ def _port_open(port: int, host: str = "127.0.0.1") -> bool:
         return sock.connect_ex((host, port)) == 0
 
 
-def ensure_unoserver(port: int | None = None, wait_s: float = 20.0) -> subprocess.Popen | None:
+def ensure_unoserver(port: int | None = None, wait_s: float = 30.0) -> subprocess.Popen | None:
     """Start unoserver if no listener is up. Returns the process we started, if any."""
     port = port or uno_port()
     if _port_open(port):
         return None
-    server = str(Path(unoconvert_path() or "").with_name("unoserver")) if unoconvert_path() else "unoserver"
-    proc = subprocess.Popen(  # fixed argv, no shell
-        [server, "--port", str(port)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
-    )
+    conv = unoconvert_path()
+    server = str(Path(conv).with_name("unoserver")) if conv else "unoserver"
+    fd, log_path = tempfile.mkstemp(prefix="unoserver-", suffix=".log")
+    os.close(fd)
+    with open(log_path, "wb") as log:
+        proc = subprocess.Popen(  # fixed argv, no shell
+            [server, "--port", str(port)],
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
     deadline = time.time() + wait_s
     while time.time() < deadline:
         if _port_open(port):
             return proc
+        if proc.poll() is not None:
+            break
         time.sleep(0.25)
     proc.terminate()
-    raise EngineError(f"unoserver did not start on port {port}; start it manually: unoserver --port {port}")
+    try:
+        tail = Path(log_path).read_text(errors="ignore").strip().splitlines()[-4:]
+    except OSError:
+        tail = []
+    raise EngineError(
+        "unoserver did not start on port "
+        f"{port}: {' / '.join(tail) or 'no output'}. Start it manually: unoserver --port {port}"
+    )
 
 
 def _extracted_text(path: str) -> str:
