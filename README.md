@@ -64,7 +64,7 @@ src/pdftoall/
 | native | входит в пакет | MIT | цифровые PDF, простая вёрстка, важна скорость |
 | docling | `.[docling]` | MIT | многоколоночный текст, сложные таблицы, нужен OCR — лучший баланс лицензии и качества |
 | marker | `.[marker]` | Apache-2.0 код / OpenRAIL-M веса | плохие сканы, максимальная точность; работает на CPU |
-| LibreOffice | apt + unoserver | MPL-2.0 | **экспериментально**: сохранение вёрстки, `--libreoffice` (см. `docs/libreoffice.md`) |
+| LibreOffice | apt + unoserver | MPL-2.0 | **экспериментально** (проверяется отдельным job'ом в CI): сохранение вёрстки, `--libreoffice` — см. `docs/libreoffice.md` |
 
 Сознательно **не** используется: PyMuPDF (AGPL-3.0) — см. `docs/licensing.md`, прежде чем его добавлять.
 

@@ -64,7 +64,7 @@ src/pdftoall/
 | native | included | MIT | born-digital PDFs, simple layout, speed matters |
 | docling | `.[docling]` | MIT | multi-column, complex tables, needs OCR — best license/quality balance |
 | marker | `.[marker]` | Apache-2.0 code / OpenRAIL-M weights | degraded scans, highest accuracy; runs on CPU |
-| LibreOffice | apt + unoserver | MPL-2.0 | **experimental**: layout-preserving path, `--libreoffice` (see `docs/libreoffice.md`) |
+| LibreOffice | apt + unoserver | MPL-2.0 | **experimental** (own CI job): layout-preserving path, `--libreoffice` — see `docs/libreoffice.md` |
 
 Deliberately **not** used: PyMuPDF (AGPL-3.0) — see `docs/licensing.md` before adding it.
 
